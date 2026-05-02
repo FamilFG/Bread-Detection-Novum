@@ -2,28 +2,39 @@ import sqlite3 as sq
 import datetime as dt
 
 def Base_Write(count):
-    connection = sq.connect("c:/Users/User/Desktop/Novum/novum-app-main/src/bread.db")
-    cursor = connection.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS bread_sales(
-                    Id INTEGER PRIMARY KEY,
-                    Day INTEGER,
-                    Month INTEGER,
-                    Year INTEGER,
-                    Amount INTEGER)
-        ''')
-    cursor.execute("SELECT MAX(Id) FROM bread_sales")
-    result = cursor.fetchone()[0]
-    if result is None:
-        result = 0
-    Id = result + 1
-    Amount = count
+    try:
+        path = "TEST.db"
+        Today = dt.date.today()
 
-    Today = dt.date.today()
-    Day = Today.day
-    Month = Today.month
-    Year = Today.year
-    cursor.execute("INSERT INTO bread_sales (Id,Amount,Day,Month,Year) VALUES (?,?,?,?,?)",(Id,Amount,Day,Month,Year))
-    connection.commit()
-    connection.close()
+        with sq.connect(path) as Connection:
+            Cursor = Connection.cursor()
+
+            Cursor.execute('''
+                CREATE TABLE IF NOT EXISTS bread_sales(
+                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        Day INTEGER,
+                        Month INTEGER,
+                        Year INTEGER,
+                        Amount INTEGER)
+            ''')
+
+            # Resetting of dataset
+            Cursor.execute("DELETE FROM bread_sales WHERE Year < ?",(Today.year,))
+
+            # Creating new info(if exists just unite)
+            Cursor.execute("SELECT Id,Day, Month, Year,Amount FROM bread_sales WHERE Day = ? AND Month = ? AND Year = ?",(Today.day,Today.month,Today.year))
+            
+            Row = Cursor.fetchone()
+            
+            if(Row is None):
+                Cursor.execute("INSERT INTO bread_sales(Day,Month,Year,Amount) VALUES(?,?,?,?)",(Today.day,Today.month,Today.year,count))
+            else:
+                PreviousID = Row[0]
+                ourAmount = Row[4]
+                Cursor.execute("UPDATE bread_sales SET Amount = ? WHERE Id = ?",(count + ourAmount, PreviousID))
+               
+            Connection.commit()
+    except sq.Error as e:
+        print(f"Erros is {e}")
+
     
