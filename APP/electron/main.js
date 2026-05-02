@@ -1,9 +1,14 @@
 const { app, BrowserWindow, ipcMain, session } = require("electron");
+let forceQuit = false;
+
 const path = require("path");
 // Импортируем функции из твоей БД
-const { getMonthDays, getSummaryStats } = require("C:/Users/User/Desktop/Novum/novum-app-main/src/db");
+const {
+  getMonthDays,
+  getSummaryStats,
+} = require("C:/Users/User/Desktop/Novum/novum-app-main/src/db");
 
-const isDev = true; 
+const isDev = true;
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -19,18 +24,23 @@ function createWindow() {
   // Настройка разрешений
   session.defaultSession.setPermissionRequestHandler(
     (_webContents, permission, callback) => {
-      const allowed = ["media", "mediaKeySystem", "geolocation", "notifications"];
-      if (allowed.includes(permission) || permission === 'media') {
+      const allowed = [
+        "media",
+        "mediaKeySystem",
+        "geolocation",
+        "notifications",
+      ];
+      if (allowed.includes(permission) || permission === "media") {
         return callback(true);
       }
       callback(false);
-    }
+    },
   );
 
   session.defaultSession.setPermissionCheckHandler(
     (_webContents, permission) => {
       return ["media", "mediaKeySystem"].includes(permission);
-    }
+    },
   );
 
   if (isDev) {
@@ -39,6 +49,13 @@ function createWindow() {
   } else {
     win.loadFile(path.join(__dirname, "../dist/index.html"));
   }
+
+  win.on("close", (e) => {
+    if (!forceQuit) {
+      e.preventDefault();
+      win.webContents.send("request-exit");
+    }
+  });
 }
 
 // --- РЕГИСТРАЦИЯ ОБРАБОТЧИКОВ IPC ---
@@ -53,6 +70,11 @@ ipcMain.handle("get-month-days", async (_, year, month) => {
 
 ipcMain.handle("get-summary-stats", async () => {
   return await getSummaryStats();
+});
+
+ipcMain.on("confirm-exit", () => {
+  forceQuit = true;
+  app.quit();
 });
 
 // ------------------------------------

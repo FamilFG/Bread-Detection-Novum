@@ -186,3 +186,133 @@ body,
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* --- Security Modal --- */
+.exit-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+.exit-modal {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 2.5rem;
+  border-radius: 24px;
+  width: 400px;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.exit-modal-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.exit-modal h2 {
+  color: #fff;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.exit-modal p {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+}
+
+.exit-code-container {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.exit-code-input {
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 2rem;
+  width: 100%;
+  padding: 1rem;
+  border-radius: 12px;
+  text-align: center;
+  letter-spacing: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.exit-code-input:focus {
+  outline: none;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
+}
+
+.exit-modal-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.exit-btn {
+  flex: 1;
+  padding: 0.8rem;
+  border-radius: 12px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.exit-btn-cancel {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.exit-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.exit-btn-confirm {
+  background: #f59e0b;
+  color: #000;
+}
+
+.exit-btn-confirm:hover {
+  background: #fbbf24;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+.exit-btn-confirm:active {
+  transform: translateY(0);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

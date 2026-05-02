@@ -7,17 +7,30 @@ import CameraCapture from "./components/CameraCapture/CameraCapture";
 import StatCard from "./components/StatCard/StatCard";
 import CalendarDashboard from "./components/CalendarDashboard/CalendarDashboard";
 import CaptureLog from "./components/CaptureLog/CaptureLog";
+import ExitModal from "./components/ExitModal/ExitModal";
 
 const NOW = new Date();
 
 export default function App() {
-  const [stats, setStats] = useState({ today: 0, yesterday: 0, thisWeek: 0, thisMonth: 0 });
+  const [stats, setStats] = useState({
+    today: 0,
+    yesterday: 0,
+    thisWeek: 0,
+    thisMonth: 0,
+  });
   const [log, setLog] = useState(initialLog);
   const [calYear, setCalYear] = useState(NOW.getFullYear());
   const [calMonth, setCalMonth] = useState(NOW.getMonth());
+  const [showExitPrompt, setShowExitPrompt] = useState(false);
 
   useEffect(() => {
     getSummaryStats().then(setStats).catch(console.error);
+
+    if (window.electron && window.electron.onExitRequested) {
+      window.electron.onExitRequested(() => {
+        setShowExitPrompt(true);
+      });
+    }
   }, []);
 
   const handleCapture = useCallback(({ time, count }) => {
@@ -40,7 +53,10 @@ export default function App() {
         </span>
         <span className="header-date">
           {NOW.toLocaleDateString("en-GB", {
-            weekday: "long", year: "numeric", month: "long", day: "numeric",
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
           })}
         </span>
       </header>
@@ -53,15 +69,51 @@ export default function App() {
 
         <main className="right-panel">
           <div className="stats-grid">
-            <StatCard variant="today" icon="☀️" label="Today" value={stats.today} trend="vs yesterday" trendUp={false} />
-            <StatCard variant="yesterday" icon="📅" label="Yesterday" value={stats.yesterday} trend="vs 2 days ago" trendUp={true} />
-            <StatCard variant="weekly" icon="📊" label="This Week" value={stats.thisWeek} trend="vs last week" trendUp={true} />
-            <StatCard variant="monthly" icon="🗓️" label="This Month" value={stats.thisMonth} trend="days tracked" />
+            <StatCard
+              variant="today"
+              icon="☀️"
+              label="Today"
+              value={stats.today}
+              trend="vs yesterday"
+              trendUp={false}
+            />
+            <StatCard
+              variant="yesterday"
+              icon="📅"
+              label="Yesterday"
+              value={stats.yesterday}
+              trend="vs 2 days ago"
+              trendUp={true}
+            />
+            <StatCard
+              variant="weekly"
+              icon="📊"
+              label="This Week"
+              value={stats.thisWeek}
+              trend="vs last week"
+              trendUp={true}
+            />
+            <StatCard
+              variant="monthly"
+              icon="🗓️"
+              label="This Month"
+              value={stats.thisMonth}
+              trend="days tracked"
+            />
           </div>
 
-          <CalendarDashboard year={calYear} month={calMonth} onMonthChange={handleMonthChange} />
+          <CalendarDashboard
+            year={calYear}
+            month={calMonth}
+            onMonthChange={handleMonthChange}
+          />
         </main>
       </div>
+
+      <ExitModal
+        isOpen={showExitPrompt}
+        onClose={() => setShowExitPrompt(false)}
+      />
     </div>
   );
 }
