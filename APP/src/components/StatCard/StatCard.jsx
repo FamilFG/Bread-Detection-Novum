@@ -17,9 +17,9 @@ export default function StatCard({
 
   // Animate counter on mount / when value changes
   useEffect(() => {
+    const end = Number(value) || 0; // Fallback to 0 if NaN/undefined
     let frame;
-    const start = 0;
-    const end = value;
+    const start = displayed; // Start from current displayed value
     const duration = 1000; // ms
     const startTime = performance.now();
 

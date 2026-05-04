@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import "./index.css";
 
-import { getSummaryStats, captureLog as initialLog } from "./mockData"; // ← убрал summaryStats
+import { getSummaryStats, captureLog as initialLog } from "./mockData";
 
 import CameraCapture from "./components/CameraCapture/CameraCapture";
 import StatCard from "./components/StatCard/StatCard";
@@ -13,10 +13,10 @@ const NOW = new Date();
 
 export default function App() {
   const [stats, setStats] = useState({
-    today: 0,
-    yesterday: 0,
-    thisWeek: 0,
-    thisMonth: 0,
+    today: { value: 0, trend: "...", trendUp: true },
+    yesterday: { value: 0, trend: "...", trendUp: true },
+    thisWeek: { value: 0, trend: "...", trendUp: true },
+    thisMonth: { value: 0, trend: "...", trendUp: true },
   });
   const [log, setLog] = useState(initialLog);
   const [calYear, setCalYear] = useState(NOW.getFullYear());
@@ -24,7 +24,29 @@ export default function App() {
   const [showExitPrompt, setShowExitPrompt] = useState(false);
 
   useEffect(() => {
-    getSummaryStats().then(setStats).catch(console.error);
+    getSummaryStats()
+      .then((data) => {
+        // Defensive check: if data is already in correct format, use it.
+        // If it's the old format (simple numbers), wrap them.
+        const normalized = {};
+        for (const key of ["today", "yesterday", "thisWeek", "thisMonth"]) {
+          if (
+            data[key] &&
+            typeof data[key] === "object" &&
+            "value" in data[key]
+          ) {
+            normalized[key] = data[key];
+          } else {
+            normalized[key] = {
+              value: data[key] || 0,
+              trend: "...",
+              trendUp: true,
+            };
+          }
+        }
+        setStats(normalized);
+      })
+      .catch(console.error);
 
     if (window.electron && window.electron.onExitRequested) {
       window.electron.onExitRequested(() => {
@@ -35,7 +57,10 @@ export default function App() {
 
   const handleCapture = useCallback(({ time, count }) => {
     setLog((prev) => [{ id: Date.now(), time, count }, ...prev].slice(0, 20));
-    setStats((prev) => ({ ...prev, today: prev.today + count }));
+    setStats((prev) => ({
+      ...prev,
+      today: { ...prev.today, value: prev.today.value + count },
+    }));
   }, []);
 
   const handleMonthChange = useCallback((y, m) => {
@@ -73,32 +98,33 @@ export default function App() {
               variant="today"
               icon="☀️"
               label="Today"
-              value={stats.today}
-              trend="vs yesterday"
-              trendUp={false}
+              value={stats.today.value}
+              trend={stats.today.trend}
+              trendUp={stats.today.trendUp}
             />
             <StatCard
               variant="yesterday"
               icon="📅"
               label="Yesterday"
-              value={stats.yesterday}
-              trend="vs 2 days ago"
-              trendUp={true}
+              value={stats.yesterday.value}
+              trend={stats.yesterday.trend}
+              trendUp={stats.yesterday.trendUp}
             />
             <StatCard
               variant="weekly"
               icon="📊"
               label="This Week"
-              value={stats.thisWeek}
-              trend="vs last week"
-              trendUp={true}
+              value={stats.thisWeek.value}
+              trend={stats.thisWeek.trend}
+              trendUp={stats.thisWeek.trendUp}
             />
             <StatCard
               variant="monthly"
               icon="🗓️"
               label="This Month"
-              value={stats.thisMonth}
-              trend="days tracked"
+              value={stats.thisMonth.value}
+              trend={stats.thisMonth.trend}
+              trendUp={stats.thisMonth.trendUp}
             />
           </div>
 
