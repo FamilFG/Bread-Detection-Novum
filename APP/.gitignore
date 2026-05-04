@@ -5,3 +5,4 @@ release
 *.zip
 *.dmg
 *.AppImage
+__pycache__/

@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.venv
+env/
+venv/
+ENV/
+node_modules/
+dist/
+release/
+*.exe
+*.zip
+*.dmg
+*.AppImage
