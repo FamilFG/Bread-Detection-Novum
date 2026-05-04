@@ -12,7 +12,7 @@ Bread-Detection-Novum/
 │
 ├── transformation/             # Data processing pipeline
 │   ├── dataAugmentation.py     # Dataset augmentation logic
-│   └── AllOurTransformations.py# Custom transformation functions
+│   └── AllTransformations.py   # Custom transformation functions
 │
 ├── requirements.txt            # Python dependencies
 ├── README.md
