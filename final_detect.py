@@ -4,10 +4,10 @@ from ultralytics import YOLO
 from final_base import *
 
 # 1. Загрузка модели
-model = YOLO("C:/Users/User/Desktop/Projects/Projects_Python/Cv_Novum_Data_Augmentation/best.pt")
+model = YOLO("data/best.pt")
 
 # 2. Видео
-cap = cv2.VideoCapture("working-version/bread_video.mp4")
+cap = cv2.VideoCapture("data/bread_video.mp4")
 
 
 ret, frame = cap.read()

@@ -1,8 +1,11 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 
+const STREAM_URL = "http://localhost:5000/video_feed";
+
 export default function useCamera({ onCapture }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const imgRef = useRef(null);
   const streamRef = useRef(null);
 
   const [mode, setMode] = useState("idle"); // "idle" | "live" | "snapshot"
@@ -11,119 +14,116 @@ export default function useCamera({ onCapture }) {
   const [error, setError] = useState(null);
   const [devices, setDevices] = useState([]);
   const [selectedDevice, setSelectedDevice] = useState("");
+  const [connectionStatus, setConnectionStatus] = useState("disconnected");
 
   const stopStream = useCallback(() => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current.getTracks?.().forEach((t) => t.stop());
       streamRef.current = null;
     }
     if (videoRef.current) {
       videoRef.current.srcObject = null;
+    }
+    if (imgRef.current) {
+      imgRef.current.src = "";
     }
   }, []);
 
   const startCamera = useCallback(
     async (forcedDeviceId) => {
       setError(null);
+      setConnectionStatus("connecting");
       stopStream();
 
-      const deviceId = forcedDeviceId || selectedDevice;
-
-      const constraints = {
-        video: deviceId
-          ? {
-              deviceId: { exact: deviceId },
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
-            }
-          : { width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: false,
-      };
-
+      // Подключение к HTTP-потоку Flask (MJPEG)
       try {
-        console.log(
-          "[Camera] Requesting access with constraints:",
-          constraints,
-        );
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        streamRef.current = stream;
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.onloadedmetadata = () => {
-            videoRef.current
-              .play()
-              .catch((e) => console.error("[Camera] Play error:", e));
+        console.log("[Camera] Connecting to RTSP stream via HTTP...");
+        
+        // Создаём img элемент для MJPEG-потока и сразу устанавливаем src
+        if (imgRef.current) {
+          imgRef.current.onerror = () => {
+            setError("Failed to connect to RTSP stream. Make sure final_detect_live.py is running on port 5000");
+            setConnectionStatus("error");
+            console.error("[Camera] Stream error");
           };
+          
+          // Устанавливаем источник - браузер сам попробует подключиться
+          imgRef.current.src = STREAM_URL + "?" + Date.now(); // Кеш-буст
+          
+          // Даём время для инициализации
+          setConnectionStatus("connected");
+          console.log("[Camera] MJPEG stream URL set, attempting connection...");
         }
 
         setSnapshot(null);
         setLastCount(null);
         setMode("live");
       } catch (err) {
-        console.error("[Camera] getUserMedia error:", err);
-        setError(
-          err.name === "NotAllowedError"
-            ? "Camera permission denied. Check Electron permissions."
-            : err.name === "NotFoundError"
-              ? "No camera found on this device."
-              : `Camera error: ${err.message}`,
-        );
+        console.error("[Camera] Connection error:", err);
+        setError(`Error: ${err.message}`);
+        setConnectionStatus("error");
       }
     },
-    [selectedDevice, stopStream],
+    [stopStream],
   );
 
   const capture = useCallback(() => {
-    const video = videoRef.current;
+    const img = imgRef.current;
     const canvas = canvasRef.current;
-    if (!video || !canvas || video.readyState < 2) return;
+    if (!img || !canvas) return;
 
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
-    canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.width = img.width || 640;
+    canvas.height = img.height || 480;
+    try {
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.88);
+      setSnapshot(dataUrl);
 
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.88);
-    setSnapshot(dataUrl);
+      const mockCount = Math.floor(Math.random() * 5) + 1;
+      setLastCount(mockCount);
 
-    const mockCount = Math.floor(Math.random() * 5) + 1;
-    setLastCount(mockCount);
-
-    onCapture?.({
-      time: new Date().toLocaleTimeString("en-GB", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      }),
-      count: mockCount,
-    });
+      onCapture?.({
+        time: new Date().toLocaleTimeString("en-GB", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        }),
+        count: mockCount,
+      });
+    } catch (e) {
+      console.error("[Capture] Error:", e);
+      setError("Cannot capture frame from MJPEG stream");
+    }
   }, [onCapture]);
 
-  const runDetection = useCallback(async () => {
-    setError(null);
+  const runDetection = useCallback(() => {
     setMode("live");
-    try {
-      console.log("[Detection] Starting Python script...");
-      await window.electron.runDetection();
-    } catch (err) {
-      console.error("[Detection] Error:", err);
-      setError("Detection failed: " + err.message);
-    } finally {
-      setMode("idle");
-    }
-  }, []);
+    startCamera();
+  }, [startCamera]);
 
+  // Инициализация: загрузить список устройств и начать трансляцию
   useEffect(() => {
-    // Disable automatic camera device detection for video mode
-  }, []);
+    (async () => {
+      try {
+        // Загружаем список устройств (для совместимости, но не используем для RTSP)
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter((d) => d.kind === "videoinput");
+        setDevices(videoDevices);
+        if (videoDevices.length > 0) {
+          setSelectedDevice(videoDevices[0].deviceId);
+        }
+      } catch (e) {
+        console.error("[Devices] Error:", e);
+      }
+    })();
 
-  useEffect(() => {
-    // Mock capture disabled for video mode
-  }, [mode, capture]);
+    return () => stopStream();
+  }, [stopStream]);
 
   return {
     videoRef,
     canvasRef,
+    imgRef,
     mode,
     setMode,
     snapshot,
@@ -135,5 +135,7 @@ export default function useCamera({ onCapture }) {
     startCamera,
     stopStream,
     runDetection,
+    capture,
+    connectionStatus,
   };
 }
