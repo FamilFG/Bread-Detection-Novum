@@ -1,0 +1,8 @@
+node_modules
+dist
+release
+*.exe
+*.zip
+*.dmg
+*.AppImage
+__pycache__/

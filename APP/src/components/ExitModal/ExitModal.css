@@ -1,0 +1,168 @@
+/* ── Security Modal ─────────────────────────────────────────────────────── */
+.exit-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+.exit-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 2.5rem;
+  border-radius: 24px;
+  width: 400px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.exit-modal-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.exit-modal h2 {
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.exit-modal p {
+  color: var(--muted);
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+}
+
+.exit-code-container {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.exit-code-input {
+  background: var(--surface2);
+  border: 2px solid var(--border);
+  color: var(--text);
+  font-size: 2rem;
+  width: 100%;
+  padding: 1rem;
+  border-radius: 12px;
+  text-align: center;
+  letter-spacing: 0.5rem;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.exit-code-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.12);
+}
+
+.exit-modal-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.exit-btn {
+  flex: 1;
+  padding: 0.8rem;
+  border-radius: 12px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.15s;
+}
+
+.exit-btn-cancel {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.exit-btn-cancel:hover {
+  background: var(--border);
+}
+
+.exit-btn-confirm {
+  background: var(--accent);
+  color: #fff;
+}
+.exit-btn-confirm:hover {
+  background: #1648c0;
+  transform: translateY(-1px);
+}
+.exit-btn-confirm:active {
+  transform: translateY(0);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.exit-modal.shake {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shake {
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
+.exit-modal-error {
+  color: var(--accent2);
+  font-size: 0.85rem;
+  margin-top: -1.5rem;
+  margin-bottom: 1.5rem;
+  height: 1.2rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.exit-modal-error.visible {
+  opacity: 1;
+}
+
+.exit-code-input.error {
+  border-color: var(--accent2);
+  box-shadow: 0 0 0 3px rgba(224, 36, 36, 0.12);
+}

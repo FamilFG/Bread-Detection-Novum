@@ -1,0 +1,94 @@
+/* ── StatCard styles ──────────────────────────────────────────────────────── */
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  cursor: default;
+  user-select: none;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.stat-card.today::before {
+  background: var(--accent);
+}
+.stat-card.yesterday::before {
+  background: var(--blue);
+}
+.stat-card.weekly::before {
+  background: var(--green);
+}
+.stat-card.monthly::before {
+  background: var(--purple);
+}
+
+.stat-icon {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.stat-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -1.5px;
+}
+
+.stat-card.today .stat-value {
+  color: var(--accent);
+}
+.stat-card.yesterday .stat-value {
+  color: var(--blue);
+}
+.stat-card.weekly .stat-value {
+  color: var(--green);
+}
+.stat-card.monthly .stat-value {
+  color: var(--purple);
+}
+
+.stat-trend {
+  margin-top: 10px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.trend-up {
+  color: var(--green);
+}
+.trend-down {
+  color: var(--accent2);
+}

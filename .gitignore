@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+camera_config.json
+stop_detection.flag
+.venv
+env/
+venv/
+ENV/
+node_modules/
+dist/
+release/
+*.exe
+*.zip
+*.dmg
+*.AppImage
